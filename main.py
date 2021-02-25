@@ -2,6 +2,8 @@ import requests # à installer via un pip install requests dans les CMD
 from bs4 import BeautifulSoup
 from pprint import pprint
 from python_scrap import livre_analyse
+import csv
+import shutil
 
 def clear(titre):
     propre = ""
@@ -39,10 +41,44 @@ def livre_in_categorie(categorie):
 
 ensemble_livres = []
 print(liste_categories())
-for cat in liste_categories().values():
-    for livre_url in livre_in_categorie(cat):
-        print(livre_url)
-        ensemble_livres.append(livre_analyse(livre_url))
-        print(livre_analyse(livre_url))
+def afficher():
+    for cat in liste_categories().values():
+        for livre_url in livre_in_categorie(cat):
+            print(livre_url)
+            ensemble_livres.append(livre_analyse(livre_url))
+            print(livre_analyse(livre_url))
+    return ensemble_livres
 
-print(ensemble_livres)
+print("*****************")
+un_livre = livre_analyse("http://books.toscrape.com/catalogue/little-women-little-women-1_331/index.html")
+pprint(un_livre)
+
+def download(livre):
+    url = livre['Image url']
+    titre = livre['Titre'].split("|")
+    titre = titre[0].split()
+    titre = "_".join(titre)
+    titre = titre + ".jpg"
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        r.raw.decode_content = True
+        with open("images/"+titre, 'wb') as file:
+            shutil.copyfileobj(r.raw, file)
+            print(f"{titre} bien téléchargée" )
+    else:
+        print("image indisponible")
+    print(titre)
+    print(url)
+
+#download(un_livre)
+
+print(list(un_livre.keys()))
+
+def to_csv(livre):
+    with open("livre.csv", 'w', newline='') as csv_file:
+        fieldnames = list(livre.keys())
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerow(livre)
+
+to_csv(un_livre)
