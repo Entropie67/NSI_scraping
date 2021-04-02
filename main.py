@@ -5,7 +5,7 @@ from python_scrap import livre_analyse
 import csv
 import shutil
 
-def clear(titre):
+def clear(titre: str) -> str:
     propre = ""
     for lettre in titre:
         if lettre != " ":
@@ -14,7 +14,7 @@ def clear(titre):
 
 
 #default > div > div > div > aside > div.side_categories
-def liste_categories():
+def liste_categories() ->dict[str, str]:
     """Retourne un dictionnaire avec les catégories"""
     url = "http://books.toscrape.com/catalogue/category/books_1/index.html"
     page = requests.get(url)
@@ -27,8 +27,10 @@ def liste_categories():
         categories[clear(lien.text.replace("\n", ""))] = url_cat
     return categories
 
-def livre_in_categorie(categorie):
-    """extrait les livres d'une  catégorie"""
+
+def livre_in_categorie(categorie: str) -> list[str]:
+    """ A partir de l'url d'une catégorie cette fonction retourne
+     les urls de tous les livres de cette catégorie"""
     url = categorie
     page = requests.get(url)
     html = page.text
@@ -45,7 +47,9 @@ def afficher():
     for cat in liste_categories().values():
         for livre_url in livre_in_categorie(cat):
             print(livre_url)
+
             ensemble_livres.append(livre_analyse(livre_url))
+
             print(livre_analyse(livre_url))
     return ensemble_livres
 
