@@ -1,10 +1,9 @@
-
 import requests # à installer via un pip install requests dans les CMD
 from bs4 import BeautifulSoup
 from pprint import pprint
-url = "http://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
 
-def livre_analyse(url):
+
+def livre_analyse(url: str) -> dict[str, any]:
     """ Permet d'analyser un livre A partir de l'url du livre permet de retourner
     le titre, l'url de l'image et la description"""
     page = requests.get(url)
@@ -22,4 +21,6 @@ def livre_analyse(url):
     info = {"Code": code, "Titre": titre, "Image url": image_url, "Description": description, "Prix": prix, "Disponibilité": disponible}
     return info
 
-pprint(livre_analyse(url))
+# Pour tester la fonction
+# url = "http://books.toscrape.com/catalogue/sapiens-a-brief-history-of-humankind_996/index.html"
+# pprint(livre_analyse(url))

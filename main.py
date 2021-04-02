@@ -12,9 +12,8 @@ def clear(titre: str) -> str:
             propre += lettre
     return propre
 
-
 #default > div > div > div > aside > div.side_categories
-def liste_categories() ->dict[str, str]:
+def liste_categories() -> dict[str, str]:
     """Retourne un dictionnaire avec les catégories"""
     url = "http://books.toscrape.com/catalogue/category/books_1/index.html"
     page = requests.get(url)
@@ -41,23 +40,9 @@ def livre_in_categorie(categorie: str) -> list[str]:
         livres_url.append("http://books.toscrape.com/catalogue/" + lien.a["href"][9:])
     return livres_url
 
-ensemble_livres = []
-print(liste_categories())
-def afficher():
-    for cat in liste_categories().values():
-        for livre_url in livre_in_categorie(cat):
-            print(livre_url)
 
-            ensemble_livres.append(livre_analyse(livre_url))
-
-            print(livre_analyse(livre_url))
-    return ensemble_livres
-
-print("*****************")
-un_livre = livre_analyse("http://books.toscrape.com/catalogue/little-women-little-women-1_331/index.html")
-pprint(un_livre)
-
-def download(livre):
+def download(livre: dict[str, any]) -> None:
+    """ Télécharge l'image liées au livre dans le dossier image"""
     url = livre['Image url']
     titre = livre['Titre'].split("|")
     titre = titre[0].split()
@@ -71,18 +56,40 @@ def download(livre):
             print(f"{titre} bien téléchargée" )
     else:
         print("image indisponible")
-    print(titre)
-    print(url)
 
-#download(un_livre)
 
-print(list(un_livre.keys()))
-
-def to_csv(livre):
-    with open("livre.csv", 'w', newline='') as csv_file:
+def to_csv(livre: dict[str, any], categorie: str) -> None:
+    """ crée un csv par catégorie de livre"""
+    file_name = "csv/"+categorie + ".csv"
+    print(f"Écriture dans {file_name}")
+    with open(file_name, 'w', newline='') as csv_file:
         fieldnames = list(livre.keys())
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow(livre)
 
-to_csv(un_livre)
+
+# Attention, il faut un csv par catégorie
+def main():
+    ensemble_livres = []
+    for cat in liste_categories().values():
+        cat_name = cat.split("/")[6][:-2].capitalize()
+        print(f"\n***\t{cat_name}\t***\n")
+        for livre_url in livre_in_categorie(cat):
+            livre = livre_analyse(livre_url)
+            print(livre_url)
+            print(livre)
+            ensemble_livres.append(livre)
+            # Étape de téléchargement des livres
+            download(livre)
+            to_csv(livre, cat_name)
+    return ensemble_livres
+
+main()
+
+
+# Tests
+# un_livre = livre_analyse("http://books.toscrape.com/catalogue/little-women-little-women-1_331/index.html")
+# pprint(un_livre)
+# ownload(un_livre)
+# to_csv(un_livre, "romantique")
